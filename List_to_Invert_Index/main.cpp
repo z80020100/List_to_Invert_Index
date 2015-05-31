@@ -25,7 +25,7 @@ int main()
 	string list_path = "./List/";
 	
 	fstream list_file, index_file, log_file;
-	string file_name, index_path, log_path = "./log.txt";
+	string file_name, index_path, log_path = "./List_to_Invert_index_Log.txt";
 
 	char buf[1024];
 	string keyword, max_keyword, max_file_ID;
@@ -43,7 +43,7 @@ int main()
 		readdir(dp); // ..
 		while (ep = readdir(dp)) // read the list file, the list file need to be UNIX format
 		{
-			printf("%s\n", ep->d_name);
+			//printf("%s\n", ep->d_name);
 			file_name.assign(ep->d_name);
 
 			list_path = "./List/";
@@ -82,8 +82,8 @@ int main()
 					}
 					memset(buf, 0, sizeof(buf));
 				}
-				cout << "          File ID: " << file_name << endl; 
-				cout << "Number of keyword: " << keyword_number << endl << endl;
+				//cout << "          File ID: " << file_name << endl; 
+				//cout << "Number of keyword: " << keyword_number << endl << endl;
 				log_file << "          File ID: " << file_name << endl;
 				log_file << "Number of keyword: " << keyword_number << endl << endl;
 				
@@ -96,14 +96,14 @@ int main()
 	cout << "The maximum keyowrd: " << max_keyword << endl;
 	log_file << "The maximum length of keyword: " << max_length << " in file ID: " << max_file_ID << endl;
 	log_file << "The maximum keyword: " << max_keyword << endl;
-	
-	log_file.close();
 	/* Program to Timing */
 	QueryPerformanceCounter(&endTime); // 取得開機到程式執行完成經過幾個CPU Cycle
 	times = ((double)endTime.QuadPart - (double)startTime.QuadPart) / fre.QuadPart;
 
 	cout << fixed << setprecision(3) << "Processing time: " << times << 's' << endl << endl;
-
+	log_file << fixed << setprecision(3) << "Processing time: " << times << 's' << endl << endl;
+	log_file.close();
+	
 	system("PAUSE");
 	return 0;
 }

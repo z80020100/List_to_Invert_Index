@@ -87,7 +87,7 @@ int main()
 				//cout << "Number of keyword: " << keyword_number << endl << endl;
 				log_file << "          File ID: " << file_name << endl;
 				log_file << "Number of keyword: " << keyword_number << endl << endl;
-				
+
 				list_file.close();
 			}
 		}

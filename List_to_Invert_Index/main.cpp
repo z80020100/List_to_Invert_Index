@@ -55,6 +55,7 @@ int main()
 			{
 				memset(buf, 0, sizeof(buf));
 				keyword_number = 0;
+				file_name.erase(file_name.end() - 5, file_name.end());
 				while (list_file.getline(buf, sizeof(buf)))
 				{
 					keyword_number++;
@@ -68,7 +69,7 @@ int main()
 					}
 
 					index_path = "./Index/" + keyword;
-					cout << index_path << endl;
+					//cout << index_path << endl;
 					index_file.open(index_path, ios::app);
 					if (!index_file)
 					{

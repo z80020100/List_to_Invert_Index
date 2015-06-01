@@ -3,10 +3,15 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include<map>
+#include<vector>
 #include <iomanip>
-#include <windows.h>
+
+#include <cstring>
 #include <cstdio>
 #include <cstdlib>
+
+#include <windows.h>
 #include <dirent.h>
 
 using namespace std;
@@ -29,7 +34,10 @@ int main()
 
 	char buf[1024];
 	string keyword, max_keyword, max_file_ID;
-	int max_length = 0, keyword_number;
+	int max_length = 0, temp_length, keyword_number;
+
+	map < string, vector<string> > invert_index_map;
+	map < string, vector<string> >::iterator it;
 
 	log_file.open(log_path, ios::out);
 	if (!log_file)
@@ -38,58 +46,74 @@ int main()
 	dp = opendir(list_path.c_str()); // for each file f, create a list f_bar of unique keyword
 	if (dp != NULL)
 	{
-
-		readdir(dp); // .
-		readdir(dp); // ..
-		while (ep = readdir(dp)) // read the list file, the list file need to be UNIX format
+		index_path = "./Index/Invert_Index.idx";
+		//cout << index_path << endl;
+		index_file.open(index_path, ios::out);
+		if (!index_file)
 		{
-			//printf("%s\n", ep->d_name);
-			file_name.assign(ep->d_name);
-
-			list_path = "./List/";
-			list_path.append(file_name);
-			list_file.open(list_path, ios::in);
-			if (!list_file)
-				cerr << "Error: open: " << list_path << " failed..." << endl;
-			else
+			cerr << "Error: open " << index_path << " failed..." << endl << endl;
+			log_file << "Error: open " << index_path << " failed..." << endl << endl;
+		}
+		else
+		{
+			readdir(dp); // .
+			readdir(dp); // ..
+			while (ep = readdir(dp)) // read the list file, the list file need to be UNIX format
 			{
-				memset(buf, 0, sizeof(buf));
-				keyword_number = 0;
-				file_name.erase(file_name.end() - 5, file_name.end());
-				while (list_file.getline(buf, sizeof(buf)))
+				//printf("%s\n", ep->d_name);
+				file_name.assign(ep->d_name);
+
+				list_path = "./List/";
+				list_path.append(file_name);
+				list_file.open(list_path, ios::in);
+				if (!list_file)
+					cerr << "Error: open: " << list_path << " failed..." << endl;
+				else
 				{
-					keyword_number++;
-					keyword.assign(buf);
-					//cout << keyword << endl;
-					if (keyword.size() > max_length)
-					{
-						max_length = keyword.size();
-						max_keyword = keyword;
-						max_file_ID = file_name;
-					}
-
-					index_path = "./Index/" + keyword;
-					//cout << index_path << endl;
-					index_file.open(index_path, ios::app);
-					if (!index_file)
-					{
-						cerr << "Error: open " << index_path << " failed..." << endl << endl;
-						log_file << "Error: open " << index_path << " failed..." << endl << endl;
-					}
-					else
-					{
-						index_file << file_name << '\n';
-						index_file.close();
-					}
 					memset(buf, 0, sizeof(buf));
-				}
-				//cout << "          File ID: " << file_name << endl; 
-				//cout << "Number of keyword: " << keyword_number << endl << endl;
-				log_file << "          File ID: " << file_name << endl;
-				log_file << "Number of keyword: " << keyword_number << endl << endl;
+					keyword_number = 0;
+					file_name.erase(file_name.end() - 5, file_name.end());
 
-				list_file.close();
+					while (list_file.getline(buf, sizeof(buf)))
+					{
+						keyword_number++;
+						keyword.assign(buf);
+						//cout << keyword << endl;
+						temp_length = keyword.size();
+						if (temp_length > max_length)
+						{
+							max_length = keyword.size();
+							max_keyword = keyword;
+							max_file_ID = file_name;
+						}
+						memset(buf, 0, sizeof(buf));
+						invert_index_map[keyword].push_back(file_name);
+
+					}
+					//cout << "          File ID: " << file_name << endl; 
+					//cout << "Number of keyword: " << keyword_number << endl << endl;
+					log_file << "          File ID: " << file_name << endl;
+					log_file << "Number of keyword: " << keyword_number << endl << endl;
+
+					list_file.close();
+				}
 			}
+
+			for (it = invert_index_map.begin(); it != invert_index_map.end(); it++)
+			{
+				//cout << it->first << ":";
+				index_file << it->first << ":";
+				keyword = it->first;
+				for (int i = 0; i < invert_index_map[keyword].size(); i++)
+				{
+					//cout << invert_index_map[keyword][i] << " ";
+					index_file << invert_index_map[keyword][i] << " ";
+				}
+				//cout <<endl;
+				index_file <<endl;
+			}
+
+			index_file.close();
 		}
 	}
 	

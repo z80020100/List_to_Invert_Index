@@ -3,8 +3,8 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include<map>
-#include<vector>
+#include <map>
+#include <vector>
 #include <iomanip>
 
 #include <cstring>
@@ -27,17 +27,18 @@ int main()
 	/* Program to Timing */
 	DIR *dp;
 	struct dirent *ep;
-	string list_path = "./List/";
+	string list_path = "./List_Multi_File/";
 	
 	fstream list_file, index_file, log_file;
 	string file_name, index_path, log_path = "./List_to_Invert_index_Log.txt";
 
 	char buf[1024];
-	string keyword, max_keyword, max_file_ID;
-	int max_length = 0, temp_length, keyword_number;
+	string keyword, max_keyword, max_file_ID, max_number_keyword;
+	int max_length = 0, temp_length, keyword_number, temp_number, max_file_number = 0;
 
-	map < string, vector<string> > invert_index_map;
-	map < string, vector<string> >::iterator it;
+	map < string, vector<int> > invert_index_map;
+	map < string, vector<int> >::iterator it;
+	int file_ID;
 
 	log_file.open(log_path, ios::out);
 	if (!log_file)
@@ -48,7 +49,7 @@ int main()
 	{
 		index_path = "./Index/Invert_Index.idx";
 		//cout << index_path << endl;
-		index_file.open(index_path, ios::out);
+		index_file.open(index_path, ios::out | ios::binary);
 		if (!index_file)
 		{
 			cerr << "Error: open " << index_path << " failed..." << endl << endl;
@@ -73,7 +74,8 @@ int main()
 					memset(buf, 0, sizeof(buf));
 					keyword_number = 0;
 					file_name.erase(file_name.end() - 5, file_name.end());
-
+					file_ID = atoi(file_name.c_str());
+					//cout << file_ID << endl;
 					while (list_file.getline(buf, sizeof(buf)))
 					{
 						keyword_number++;
@@ -87,12 +89,12 @@ int main()
 							max_file_ID = file_name;
 						}
 						memset(buf, 0, sizeof(buf));
-						invert_index_map[keyword].push_back(file_name);
+						invert_index_map[keyword].push_back(file_ID);
 
 					}
 					//cout << "          File ID: " << file_name << endl; 
 					//cout << "Number of keyword: " << keyword_number << endl << endl;
-					log_file << "          File ID: " << file_name << endl;
+					log_file << "          File ID: " << file_name << ", ";
 					log_file << "Number of keyword: " << keyword_number << endl << endl;
 
 					list_file.close();
@@ -104,7 +106,13 @@ int main()
 				//cout << it->first << ":";
 				index_file << it->first << ":";
 				keyword = it->first;
-				for (int i = 0; i < invert_index_map[keyword].size(); i++)
+				temp_number = invert_index_map[keyword].size();
+				if (temp_number > max_file_number)
+				{
+					max_file_number = temp_number;
+					max_number_keyword.assign(keyword);
+				}
+				for (int i = 0; i < temp_number; i++)
 				{
 					//cout << invert_index_map[keyword][i] << " ";
 					index_file << invert_index_map[keyword][i] << " ";
@@ -125,6 +133,8 @@ int main()
 	QueryPerformanceCounter(&endTime); // 取得開機到程式執行完成經過幾個CPU Cycle
 	times = ((double)endTime.QuadPart - (double)startTime.QuadPart) / fre.QuadPart;
 
+	cout << "The maximum number of file including a keyword: " << max_file_number << ", the keyword is: " << max_number_keyword << endl;
+	log_file << "The maximum number of file including a keyword: " << max_file_number << ", the keyword is: " << max_number_keyword << endl;
 	cout << fixed << setprecision(3) << "Processing time: " << times << 's' << endl << endl;
 	log_file << fixed << setprecision(3) << "Processing time: " << times << 's' << endl << endl;
 	log_file.close();
